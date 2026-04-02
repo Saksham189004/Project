@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Esports Viewer</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <h1>🎮 Esports Tournament Viewer</h1>
+
+  <input id="search" placeholder="Search team..." />
+
+  <select id="filter">
+    <option value="">All Games</option>
+    <option value="valorant">Valorant</option>
+    <option value="cs-go">CSGO</option>
+  </select>
+
+  <button onclick="sortByDate()">Sort by Date</button>
+
+  <p id="loader">Loading...</p>
+
+  <div id="matches"></div>
+
+  <script src="script.js"></script>
+</body>
+</html>
