@@ -3,27 +3,115 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Esports Viewer</title>
-  <link rel="stylesheet" href="style.css" />
+  <title>Pro Esports Viewer</title>
+  <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
+<body class="bg-gradient-to-br from-black via-gray-900 to-gray-800 text-white">
 
-  <h1>🎮 Esports Tournament Viewer</h1>
+<div class="max-w-7xl mx-auto p-6">
+  <h1 class="text-4xl font-bold text-center mb-6">🎮 Pro Esports Viewer</h1>
 
-  <input id="search" placeholder="Search team..." />
+  <div class="flex flex-wrap gap-3 justify-center mb-6">
+    <input id="search" placeholder="Search matches..." 
+      class="px-4 py-2 rounded text-black w-60" />
 
-  <select id="filter">
-    <option value="">All Games</option>
-    <option value="valorant">Valorant</option>
-    <option value="cs-go">CSGO</option>
-  </select>
+    <select id="filter" class="px-4 py-2 rounded text-black">
+      <option value="">All Games</option>
+      <option value="valorant">Valorant</option>
+      <option value="cs-go">CSGO</option>
+    </select>
 
-  <button onclick="sortByDate()">Sort by Date</button>
+    <button onclick="sortByDate()" 
+      class="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded">Sort</button>
+  </div>
 
-  <p id="loader">Loading...</p>
+  <p id="loader" class="text-center animate-pulse">Loading matches...</p>
 
-  <div id="matches"></div>
+  <div id="matches" class="grid md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+</div>
 
-  <script src="script.js"></script>
+<script>
+const API_KEY = "FBNMht39wlZcXHQiAHqD4febhzQiWfRd9ZzpzZPNJeow4KaV12Y";
+let matchesData = [];
+
+const container = document.getElementById("matches");
+const loader = document.getElementById("loader");
+
+async function getMatches() {
+  try {
+    const res = await fetch(`https://corsproxy.io/?https://api.pandascore.co/csgo/matches?token=${API_KEY}&per_page=10`);
+    const data = await res.json();
+    matchesData = data;
+    loader.style.display = "none";
+    displayMatches(matchesData);
+  } catch (err) {
+    loader.innerText = "❌ Failed to load data";
+  }
+}
+
+function displayMatches(matches) {
+  container.innerHTML = "";
+
+  matches.map(match => {
+    const div = document.createElement("div");
+    div.className = "bg-gray-900 p-5 rounded-2xl shadow-lg hover:scale-105 transition duration-300";
+
+    div.innerHTML = `
+      <h3 class="text-xl font-bold mb-2">${match.name || "Match"}</h3>
+      <p class="text-sm text-gray-400">${match.videogame.name}</p>
+      <p>Status: ${match.status}</p>
+      <p class="text-sm">${new Date(match.begin_at).toLocaleString()}</p>
+      <button onclick='saveFavorite(${JSON.stringify(match)})'
+        class="mt-3 bg-green-500 hover:bg-green-600 px-3 py-1 rounded">❤️ Save</button>
+    `;
+
+    container.appendChild(div);
+  });
+}
+
+// SEARCH
+document.getElementById("search").addEventListener("input", (e) => {
+  const value = e.target.value.toLowerCase();
+
+  const filtered = matchesData.filter(match =>
+    (match.name || "").toLowerCase().includes(value)
+  );
+
+  displayMatches(filtered);
+});
+
+// FILTER
+document.getElementById("filter").addEventListener("change", (e) => {
+  const game = e.target.value;
+
+  if (!game) return displayMatches(matchesData);
+
+  const filtered = matchesData.filter(match =>
+    match.videogame.slug.includes(game)
+  );
+
+  displayMatches(filtered);
+});
+
+// SORT
+function sortByDate() {
+  const sorted = [...matchesData].sort((a, b) =>
+    new Date(a.begin_at) - new Date(b.begin_at)
+  );
+
+  displayMatches(sorted);
+}
+
+// FAVORITES
+function saveFavorite(match) {
+  let favs = JSON.parse(localStorage.getItem("favs")) || [];
+  favs.push(match);
+  localStorage.setItem("favs", JSON.stringify(favs));
+  alert("Saved to Favorites 🚀");
+}
+
+getMatches();
+</script>
+
 </body>
 </html>

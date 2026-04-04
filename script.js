@@ -8,6 +8,7 @@ async function getMatches() {
   try {
     const res = await fetch(`https://api.pandascore.co/matches?token=${API_KEY}`);
     const data = await res.json();
+    console.log(data);
     matchesData = data;
     loader.style.display = "none";
     displayMatches(matchesData);
